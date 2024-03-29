@@ -33,22 +33,28 @@ function App() {
                 <th>Demand Quantity</th>
                 <th>Demand Price</th>
                 <th>Last Price</th>
+                <th>Update Date</th>
                 <th>Update Time</th>
               </tr>
             </thead>
             <tbody>
-              {stocks.map((stock: StockType) => (
-                <tr key={stock.id}>
-                  <td>{stock.id}</td>
-                  <td>{stock.stockName}</td>
-                  <td>{stock.supplyQty}</td>
-                  <td>{stock.supplyPrice}</td>
-                  <td>{stock.demandQty}</td>
-                  <td>{stock.demandPrice}</td>
-                  <td>{stock.lastPrice}</td>
-                  <td>{new Date(stock.updateTime).toLocaleTimeString()}</td>
-                </tr>
-              ))}
+              {stocks.map((stock: StockType) => {
+                const date = new Date(stock.updateTime);
+                const formattedDate = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+                return (
+                  <tr key={stock.id}>
+                    <td>{stock.id}</td>
+                    <td>{stock.stockName}</td>
+                    <td>{stock.supplyQty}</td>
+                    <td>{stock.supplyPrice.toFixed(1)}</td>
+                    <td>{stock.demandQty}</td>
+                    <td>{stock.demandPrice.toFixed(1)}</td>
+                    <td>{stock.lastPrice.toFixed(1)}</td>
+                    <td>{formattedDate}</td>
+                    <td>{date.toLocaleTimeString()}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         ) : (
