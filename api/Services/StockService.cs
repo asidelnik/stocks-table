@@ -131,6 +131,10 @@ public class StockService : BackgroundService
 
   public async Task<List<Stock>> GetStocks()
   {
+    if (stocks.Count != 0)
+    {
+      UpdateStocks();
+    }
     return await Task.FromResult(stocks);
   }
 
@@ -139,19 +143,24 @@ public class StockService : BackgroundService
     while (!stoppingToken.IsCancellationRequested)
     {
       Console.WriteLine("StockService is running.");
-      foreach (var stock in stocks)
-      {
-        stock.LastPrice = random.NextDouble() * 1000;
-        stock.SupplyQty = random.Next(1, 100);
-        stock.SupplyPrice = random.NextDouble() * 100;
-        stock.DemandQty = random.Next(1, 100);
-        stock.DemandPrice = random.NextDouble() * 100;
-        stock.LastPrice = random.NextDouble() * 100;
-        stock.UpdateTime = DateTime.Now;
-      }
+      UpdateStocks();
       // Random delay between 1 and 5 seconds.
       int delay = random.Next(1, 6);
       await Task.Delay(TimeSpan.FromSeconds(delay), stoppingToken);
+    }
+  }
+
+  public void UpdateStocks()
+  {
+    foreach (var stock in stocks)
+    {
+      stock.LastPrice = random.NextDouble() * 1000;
+      stock.SupplyQty = random.Next(1, 100);
+      stock.SupplyPrice = random.NextDouble() * 100;
+      stock.DemandQty = random.Next(1, 100);
+      stock.DemandPrice = random.NextDouble() * 100;
+      stock.LastPrice = random.NextDouble() * 100;
+      stock.UpdateTime = DateTime.Now;
     }
   }
 }
