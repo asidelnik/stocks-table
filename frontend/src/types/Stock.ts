@@ -1,11 +1,11 @@
 export type StockType = {
-  StockId: number;
-  StockName: string;
-  BasePrice: number;
-  SupplyQty: number;
-  SupplyPrice: number;
-  DemandQty: number;
-  DemandPrice: number;
-  LastPrice: number;
-  UpdateTime: Date;
+  id: number;
+  stockName: string;
+  basePrice: number;
+  supplyQty: number;
+  supplyPrice: number;
+  demandQty: number;
+  demandPrice: number;
+  lastPrice: number;
+  updateTime: Date;
 };
