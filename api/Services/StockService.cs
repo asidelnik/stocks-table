@@ -154,7 +154,6 @@ public class StockService : BackgroundService
   {
     foreach (var stock in stocks)
     {
-      stock.LastPrice = random.NextDouble() * 1000;
       stock.SupplyQty = random.Next(1, 100);
       stock.SupplyPrice = random.NextDouble() * 100;
       stock.DemandQty = random.Next(1, 100);

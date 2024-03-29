@@ -1,4 +1,4 @@
-export type StockType = {
+export type StockServerType = {
   id: number;
   stockName: string;
   basePrice: number;
@@ -8,4 +8,10 @@ export type StockType = {
   demandPrice: number;
   lastPrice: number;
   updateTime: Date;
+};
+
+export type StockClientType = StockServerType & {
+  totalSupply: number;
+  totalDemand: number;
+  percentageChange: number;
 };

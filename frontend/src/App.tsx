@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import './App.css'
-import { StockType } from './types/Stock';
+import { StockClientType, StockServerType } from './types/Stock';
 
 function App() {
-  const [stocks, setStocks] = useState<StockType[]>([]);
+  const [stocks, setStocks] = useState<StockClientType[]>([]);
 
   useEffect(() => {
     getStockData();
@@ -12,16 +12,28 @@ function App() {
   function getStockData() {
     fetch('http://localhost:5195/api/stock')
       .then(response => response.json())
-      .then((data: StockType[]) => {
+      .then((data: StockServerType[]) => {
         console.log(data)
-        setStocks(data)
+        const updatedData: StockClientType[] = data.map(stock => {
+          const totalSupply = stock.supplyQty * stock.supplyPrice; // This calculation was not explained in the spec. Pershaps should show in a last row that sums all stocks supplyQty 
+          const totalDemand = stock.demandQty * stock.demandPrice;
+          const percentageChange = ((stock.lastPrice / stock.basePrice) - 1) * 100
+
+          return {
+            ...stock,
+            totalSupply: totalSupply,
+            totalDemand: totalDemand,
+            percentageChange: percentageChange
+          };
+        });
+        setStocks(updatedData);
       });
   }
 
   return (
     <>
       <div>
-        <button onClick={getStockData}>Refresh data</button>
+        <button type='button' onClick={getStockData}>רענון נתונים</button>
         {stocks.length > 0 ? (
           <table>
             <thead>
@@ -33,14 +45,18 @@ function App() {
                 <th>Demand Quantity</th>
                 <th>Demand Price</th>
                 <th>Last Price</th>
+                <th>Total Supply</th>
+                <th>Total Demand</th>
+                <th>Percentage Change</th>
                 <th>Update Date</th>
                 <th>Update Time</th>
               </tr>
             </thead>
             <tbody>
-              {stocks.map((stock: StockType) => {
+              {stocks.map((stock: StockClientType) => {
                 const date = new Date(stock.updateTime);
                 const formattedDate = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+                const formattedTime = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
                 return (
                   <tr key={stock.id}>
                     <td>{stock.id}</td>
@@ -50,8 +66,11 @@ function App() {
                     <td>{stock.demandQty}</td>
                     <td>{stock.demandPrice.toFixed(1)}</td>
                     <td>{stock.lastPrice.toFixed(1)}</td>
+                    <td>{stock.totalSupply.toFixed(1)}</td>
+                    <td>{stock.totalDemand.toFixed(1)}</td>
+                    <td>{stock.percentageChange.toFixed(1)}%</td>
                     <td>{formattedDate}</td>
-                    <td>{date.toLocaleTimeString()}</td>
+                    <td>{formattedTime}</td>
                   </tr>
                 );
               })}
