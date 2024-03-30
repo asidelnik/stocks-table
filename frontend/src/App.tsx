@@ -12,13 +12,14 @@ function App() {
     getStockData();
   }, []);
 
+  // Fetches stock data from the server
   const getStockData = async () => {
     const response = await fetch(`http://localhost:5195/api/stocks${fetchTime ? `?lastFetchTime=${fetchTime.toISOString()}` : ``}`);
     const updatedStocks: StockServerType[] = await response.json();
-    console.log(updatedStocks);
 
+    // Adds calculated properties to each stock
     const updatedStocksWithSums: StockClientType[] = updatedStocks.map((stock: StockServerType) => {
-      const totalSupply = stock.supplyQty * stock.supplyPrice; // This calculation was not explained in the spec. Pershaps should show in a last row that sums all stocks supplyQty 
+      const totalSupply = stock.supplyQty * stock.supplyPrice; // This calculation was not explained in the spec. Pershaps should show in a last row that sums all stock rows' supplyQty.
       const totalDemand = stock.demandQty * stock.demandPrice;
       const percentageChange = ((stock.lastPrice / stock.basePrice) - 1) * 100
 
@@ -30,6 +31,7 @@ function App() {
       };
     });
 
+    // Updates the stocks state with the new stock data & sorts by stock id
     setStocks(prevStocks => {
       const updatedStocksMap = new Map(updatedStocksWithSums.map(stock => [stock.id, stock]));
 

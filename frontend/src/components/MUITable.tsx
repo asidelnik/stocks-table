@@ -8,6 +8,13 @@ import Paper from '@mui/material/Paper';
 import { StocksTableProps } from '../types/StocksTableProps';
 import { StockClientType } from '../types/Stock';
 
+/**
+ * A table component that displays stock information.
+ *
+ * @param {StocksTableProps} props - The component props.
+ * @param {StockClientType[]} props.stocks - The array of stocks to display.
+ * @returns {JSX.Element} The rendered table component.
+ */
 export default function MUITable({ stocks }: StocksTableProps) {
   return (
     <TableContainer component={Paper}>
