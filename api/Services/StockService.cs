@@ -1,10 +1,79 @@
 using api.Models;
-
 namespace api.Services;
 
 public class StockService : BackgroundService
 {
   private readonly Random random = new Random();
+
+  /// <summary>
+  /// Retrieves the list of stocks.
+  /// </summary>
+  /// <param name="lastFetchTime">If provided, only stocks updated after this time will be returned.</param>
+  /// <returns>A list of stocks.</returns>  
+  public async Task<List<Stock>> GetStocks(DateTime? lastFetchTime = null)
+  {
+    if (stocks.Count != 0)
+    {
+      UpdateStocks();
+    }
+
+    if (lastFetchTime.HasValue)
+    {
+      // Filter the stocks to return only those that were updated after lastFetchTime
+      return await Task.FromResult(stocks.Where(stock => stock.UpdateTime > lastFetchTime.Value).ToList());
+    }
+    else
+    {
+      return stocks;
+    }
+  }
+
+  protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+  {
+    // while (!stoppingToken.IsCancellationRequested)
+    // {
+    //   UpdateStocks();
+    //   // Random delay between 1 and 5 seconds.
+    //   int delay = random.Next(1, 6);
+    //   await Task.Delay(TimeSpan.FromSeconds(delay), stoppingToken);
+    // }
+  }
+
+
+  /// <summary>
+  /// Updates random stocks: prices and quantities
+  /// </summary>
+  public void UpdateStocks()
+  {
+    List<int> stockIdsToUpdate = GetRandomStockIdsToUpdate();
+    foreach (var stock in stocks)
+    {
+      if (stockIdsToUpdate.Contains(stock.Id))
+      {
+        stock.SupplyQty = random.Next(1, 100);
+        stock.SupplyPrice = random.NextDouble() * 100;
+        stock.DemandQty = random.Next(1, 100);
+        stock.DemandPrice = random.NextDouble() * 100;
+        stock.LastPrice = random.NextDouble() * 100;
+        stock.UpdateTime = DateTime.UtcNow;
+      }
+    }
+  }
+
+  /// <summary>
+  /// Generates a list of random stock IDs to update.
+  /// </summary>
+  /// <returns>A list of random stock IDs.</returns>
+  private List<int> GetRandomStockIdsToUpdate()
+  {
+    int numberOfStocksToUpdate = random.Next(1, stocks.Count + 1);
+    return stocks.OrderBy(s => random.Next())
+      .Take(numberOfStocksToUpdate)
+      .Select(s => s.Id)
+      .ToList();
+  }
+
+  // Hardcoded list of stocks
   public List<Stock> stocks = new List<Stock>
   {
     new Stock
@@ -128,61 +197,4 @@ public class StockService : BackgroundService
       UpdateTime = DateTime.UtcNow.AddHours(-1)
     }
   };
-
-  public async Task<List<Stock>> GetStocks(DateTime? lastFetchTime = null)
-  {
-    if (stocks.Count != 0)
-    {
-      UpdateStocks();
-    }
-
-    if (lastFetchTime.HasValue)
-    {
-      // Filter the stocks to return only those that were updated after lastFetchTime
-      return await Task.FromResult(stocks.Where(stock => stock.UpdateTime > lastFetchTime.Value).ToList());
-    }
-    else
-    {
-      return stocks;
-    }
-  }
-
-  protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-  {
-    // while (!stoppingToken.IsCancellationRequested)
-    // {
-    //   UpdateStocks();
-    //   // Random delay between 1 and 5 seconds.
-    //   int delay = random.Next(1, 6);
-    //   await Task.Delay(TimeSpan.FromSeconds(delay), stoppingToken);
-    // }
-  }
-
-  public void UpdateStocks()
-  {
-    List<int> stockIdsToUpdate = GetRandomStockIdsToUpdate();
-    // Console.WriteLine($"Stocks to update count: {stockIdsToUpdate.Count}");
-    foreach (var stock in stocks)
-    {
-      if (stockIdsToUpdate.Contains(stock.Id))
-      {
-        stock.SupplyQty = random.Next(1, 100);
-        stock.SupplyPrice = random.NextDouble() * 100;
-        stock.DemandQty = random.Next(1, 100);
-        stock.DemandPrice = random.NextDouble() * 100;
-        stock.LastPrice = random.NextDouble() * 100;
-        stock.UpdateTime = DateTime.UtcNow;
-      }
-      // Console.WriteLine($"{stock.Id} - {stock.UpdateTime}");
-    }
-  }
-
-  private List<int> GetRandomStockIdsToUpdate()
-  {
-    int numberOfStocksToUpdate = random.Next(1, stocks.Count + 1);
-    return stocks.OrderBy(s => random.Next())
-      .Take(numberOfStocksToUpdate)
-      .Select(s => s.Id)
-      .ToList();
-  }
 }
