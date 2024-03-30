@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import './App.css'
 import { StockClientType, StockServerType } from './types/Stock';
 import MUITable from './components/MUITable';
+import { Button } from '@mui/material';
 
 function App() {
   const [fetchTime, setFetchTime] = useState<Date | null>(null);
@@ -50,8 +51,9 @@ function App() {
 
   return (
     <>
-      <div>
-        <button type='button' onClick={getStockData}>רענון נתונים</button>
+      <div className='refresh-button-container'>
+        <Button variant="contained" type='button' onClick={getStockData} className='refresh-stocks-button'>רענון נתונים</Button>
+
         {stocks.length > 0 ? (
           <MUITable stocks={stocks} />
         ) : (

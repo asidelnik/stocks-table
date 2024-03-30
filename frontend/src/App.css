@@ -52,3 +52,11 @@ table td, table th {
   padding: 8px;
   border-bottom: 1px solid gray;
 }
+
+.refresh-button-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  row-gap: 1em;
+}
