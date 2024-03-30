@@ -14,4 +14,5 @@ export type StockClientType = StockServerType & {
   totalSupply: number;
   totalDemand: number;
   percentageChange: number;
+  isPercentageChangePositive?: boolean;
 };

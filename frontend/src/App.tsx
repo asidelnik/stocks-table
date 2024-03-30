@@ -11,7 +11,7 @@ function App() {
   }, []);
 
   const getStockData = async () => {
-    const response = await fetch(`http://localhost:5195/api/stock${fetchTime ? `?lastFetchTime=${fetchTime.toISOString()}` : ``}`);
+    const response = await fetch(`http://localhost:5195/api/stocks${fetchTime ? `?lastFetchTime=${fetchTime.toISOString()}` : ``}`);
     const updatedStocks: StockServerType[] = await response.json();
     console.log(updatedStocks);
 
@@ -25,16 +25,23 @@ function App() {
         totalSupply: totalSupply,
         totalDemand: totalDemand,
         percentageChange: percentageChange,
-        // isPercentageChangePositive: percentageChange > 0
       };
     });
 
     setStocks(prevStocks => {
       const updatedStocksMap = new Map(updatedStocksWithSums.map(stock => [stock.id, stock]));
-      const newStocks = prevStocks.map(stock => updatedStocksMap.get(stock.id) || stock);
 
-      const newStocksToAdd = Array.from(updatedStocksMap.values()).filter(stock => !newStocks.find(s => s.id === stock.id));
-      return [...newStocks, ...newStocksToAdd].sort((a, b) => a.id - b.id);
+      const updatedPreviousStocks = prevStocks.map(stock => {
+        const updatedStock: StockClientType | undefined = updatedStocksMap.get(stock.id);
+        if (updatedStock) {
+          return { ...updatedStock, isPercentageChangePositive: updatedStock.percentageChange > stock.percentageChange };
+        }
+        return stock;
+      })
+
+      // Code currently not needed because server always returns same (hard coded) stocks (same ids)
+      const newStocks = Array.from(updatedStocksMap.values()).filter(stock => !updatedPreviousStocks.find(s => s.id === stock.id));
+      return [...updatedPreviousStocks, ...newStocks].sort((a, b) => a.id - b.id);
     });
 
     setFetchTime(new Date(Date.now()));
@@ -78,7 +85,7 @@ function App() {
                     <td>{stock.lastPrice.toFixed(1)}</td>
                     <td>{stock.totalSupply.toFixed(1)}</td>
                     <td>{stock.totalDemand.toFixed(1)}</td>
-                    <td>{stock.percentageChange.toFixed(1)}%</td>
+                    <td style={{ color: stock.isPercentageChangePositive === null ? 'black' : stock.isPercentageChangePositive ? 'green' : 'red' }}>{stock.percentageChange.toFixed(1)}%</td>
                     <td>{formattedDate}</td>
                     <td>{formattedTime}</td>
                   </tr>

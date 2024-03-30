@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace api.Controllers;
 
-[Route("api/stock")]
+[Route("api/stocks")]
 [ApiController]
 public class StockController : ControllerBase
 {
