@@ -3,31 +3,41 @@ import './App.css'
 import { StockClientType, StockServerType } from './types/Stock';
 
 function App() {
+  const [fetchTime, setFetchTime] = useState<Date | null>(null);
   const [stocks, setStocks] = useState<StockClientType[]>([]);
 
   useEffect(() => {
     getStockData();
   }, []);
 
-  function getStockData() {
-    fetch('http://localhost:5195/api/stock')
-      .then(response => response.json())
-      .then((data: StockServerType[]) => {
-        console.log(data)
-        const updatedData: StockClientType[] = data.map(stock => {
-          const totalSupply = stock.supplyQty * stock.supplyPrice; // This calculation was not explained in the spec. Pershaps should show in a last row that sums all stocks supplyQty 
-          const totalDemand = stock.demandQty * stock.demandPrice;
-          const percentageChange = ((stock.lastPrice / stock.basePrice) - 1) * 100
+  const getStockData = async () => {
+    const response = await fetch(`http://localhost:5195/api/stock${fetchTime ? `?lastFetchTime=${fetchTime.toISOString()}` : ``}`);
+    const updatedStocks: StockServerType[] = await response.json();
+    console.log(updatedStocks);
 
-          return {
-            ...stock,
-            totalSupply: totalSupply,
-            totalDemand: totalDemand,
-            percentageChange: percentageChange
-          };
-        });
-        setStocks(updatedData);
-      });
+    const updatedStocksWithSums: StockClientType[] = updatedStocks.map((stock: StockServerType) => {
+      const totalSupply = stock.supplyQty * stock.supplyPrice; // This calculation was not explained in the spec. Pershaps should show in a last row that sums all stocks supplyQty 
+      const totalDemand = stock.demandQty * stock.demandPrice;
+      const percentageChange = ((stock.lastPrice / stock.basePrice) - 1) * 100
+
+      return {
+        ...stock,
+        totalSupply: totalSupply,
+        totalDemand: totalDemand,
+        percentageChange: percentageChange,
+        // isPercentageChangePositive: percentageChange > 0
+      };
+    });
+
+    setStocks(prevStocks => {
+      const updatedStocksMap = new Map(updatedStocksWithSums.map(stock => [stock.id, stock]));
+      const newStocks = prevStocks.map(stock => updatedStocksMap.get(stock.id) || stock);
+
+      const newStocksToAdd = Array.from(updatedStocksMap.values()).filter(stock => !newStocks.find(s => s.id === stock.id));
+      return [...newStocks, ...newStocksToAdd].sort((a, b) => a.id - b.id);
+    });
+
+    setFetchTime(new Date(Date.now()));
   }
 
   return (
@@ -38,7 +48,7 @@ function App() {
           <table>
             <thead>
               <tr>
-                <th>ID</th>
+                <th>Stock Id</th>
                 <th>Stock Name</th>
                 <th>Supply Quantity</th>
                 <th>Supply Price</th>
