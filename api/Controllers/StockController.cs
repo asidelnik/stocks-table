@@ -16,12 +16,12 @@ public class StockController : ControllerBase
   }
 
   [HttpGet]
-  public async Task<IActionResult> Get()
+  public async Task<IActionResult> Get([FromQuery] DateTime? lastFetchTime)
   {
     IActionResult result;
     try
     {
-      var stocks = await _stockService.GetStocks();
+      var stocks = await _stockService.GetStocks(lastFetchTime);
       if (stocks == null)
       {
         result = NotFound();
