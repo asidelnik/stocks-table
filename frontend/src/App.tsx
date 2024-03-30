@@ -3,6 +3,9 @@ import './App.css'
 import { StockClientType, StockServerType } from './types/Stock';
 import MUITable from './components/MUITable';
 import { Button } from '@mui/material';
+import * as XLSX from 'xlsx';
+
+
 
 function App() {
   const [fetchTime, setFetchTime] = useState<Date | null>(null);
@@ -51,10 +54,30 @@ function App() {
     setFetchTime(new Date(Date.now()));
   }
 
+  // Export stock data to Excel
+  // Spec didn't specify header title format or float precision, so I used the server original values.
+  const exportToExcel = async () => {
+    const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+    const ws = XLSX.utils.json_to_sheet(stocks);
+    const wb = { Sheets: { 'data': ws }, SheetNames: ['data'] };
+    const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const data = new Blob([excelBuffer], { type: fileType });
+
+    const url = URL.createObjectURL(data);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'stocks.xlsx';
+    a.click();
+  }
+
   return (
     <>
-      <div className='refresh-button-container'>
-        <Button variant="contained" type='button' onClick={getStockData} className='refresh-stocks-button'>רענון נתונים</Button>
+      <div className='main-container'>
+        <div className='buttons-container'>
+          <Button variant="outlined" type='button' onClick={exportToExcel}>ייצוא לאקסל</Button>
+          <Button variant="contained" type='button' onClick={getStockData}>רענון נתונים</Button>
+        </div>
+        {/* <Button variant="outlined" type='button' onClick={exportToPDF}>ייצוא לפידיאף</Button> */}
 
         {stocks.length > 0 ? (
           <MUITable stocks={stocks} />

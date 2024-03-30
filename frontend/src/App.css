@@ -53,10 +53,16 @@ table td, table th {
   border-bottom: 1px solid gray;
 }
 
-.refresh-button-container {
+.main-container {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   row-gap: 1em;
+}
+
+.buttons-container {
+  display: flex;
+  flex-direction: row;
+  column-gap: 1em;
 }
